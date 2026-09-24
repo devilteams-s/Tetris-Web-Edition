@@ -1,0 +1,15 @@
+[Unit]
+Description=Tetris Web Edition HTTP Service
+After=network.target
+
+[Service]
+Type=simple
+User=mehmet
+WorkingDirectory=/home/mehmet/Tetris-Web-Edition
+ExecStart=/usr/bin/python3 /home/mehmet/Tetris-Web-Edition/server.py 3000
+Restart=always
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

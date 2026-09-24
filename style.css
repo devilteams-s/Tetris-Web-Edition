@@ -1,0 +1,871 @@
+/* Modern Neon Arcade Tetris Stylesheet */
+:root {
+  --bg-color: #0b0d17;
+  --panel-bg: rgba(18, 22, 39, 0.8);
+  --panel-border: rgba(110, 130, 220, 0.25);
+  --panel-glow: rgba(99, 102, 241, 0.15);
+  --text-main: #f8fafc;
+  --text-dim: #94a3b8;
+  --accent-cyan: #06b6d4;
+  --accent-magenta: #ec4899;
+  --accent-yellow: #eab308;
+  --accent-primary: #6366f1;
+  --accent-primary-hover: #4f46e5;
+  --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-retro: 'Press Start 2P', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Arka Plan Efektleri */
+.background-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ambient-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+}
+
+.glow-1 {
+  width: 450px;
+  height: 450px;
+  top: -100px;
+  left: 10%;
+  background: radial-gradient(circle, #6366f1, #3b82f6);
+}
+
+.glow-2 {
+  width: 400px;
+  height: 400px;
+  bottom: -80px;
+  right: 10%;
+  background: radial-gradient(circle, #ec4899, #8b5cf6);
+}
+
+/* Ekran Sarsıntısı (Screen Shake) */
+@keyframes screenShake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 3px); }
+  40% { transform: translate(4px, -3px); }
+  60% { transform: translate(-3px, 2px); }
+  80% { transform: translate(3px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+.shake {
+  animation: screenShake 0.28s ease-in-out;
+}
+
+/* Ana Sarmalayıcı */
+.game-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem;
+  max-width: 1050px;
+  width: 100%;
+}
+
+/* Header */
+.game-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding: 0 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.logo {
+  font-family: var(--font-retro);
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #06b6d4, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.logo-sub {
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-left: 0.5rem;
+  color: #38bdf8;
+  -webkit-text-fill-color: #38bdf8;
+  letter-spacing: 3px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Mod Seçici Navigasyon Çubuğu */
+.mode-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  background: rgba(18, 22, 39, 0.6);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(110, 130, 220, 0.2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-retro);
+  font-size: 0.62rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.6), rgba(168, 85, 247, 0.6));
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+}
+
+/* Kullanıcı Rozeti */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-user-action {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #e0e7ff;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-user-action:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4));
+  border-color: #a855f7;
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+}
+
+.btn-logout:hover {
+  background: rgba(248, 113, 113, 0.15) !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.btn-lang {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: #38bdf8;
+  font-family: var(--font-main);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.btn-lang:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text-main);
+  font-size: 1rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-cyan);
+}
+
+.btn-icon.active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Düzen: 3 Kolon */
+.main-layout {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 180px;
+}
+
+/* Glassmorphism Kartları */
+.glass-card {
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  font-size: 0.72rem;
+  font-family: var(--font-retro);
+  color: #94a3b8;
+  margin-bottom: 0.8rem;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.mini-canvas-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.mini-canvas-box.sub-next {
+  margin-top: 0.4rem;
+  margin-bottom: 0;
+  opacity: 0.8;
+}
+
+.hint-text {
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+kbd {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+/* İstatistikler */
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  padding: 0.45rem 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+}
+
+.stat-value {
+  font-family: var(--font-retro);
+  font-size: 1.15rem;
+  color: #fff;
+  margin-top: 0.25rem;
+}
+
+.stat-value.highlight {
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+/* Liderlik Tablosu */
+.leaderboard-section {
+  padding: 0.9rem;
+}
+
+.leaderboard-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.leaderboard-item.rank-1 {
+  border-color: rgba(250, 204, 21, 0.4);
+  color: #facc15;
+}
+
+.leaderboard-item .player-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+}
+
+.leaderboard-item .player-score {
+  font-family: var(--font-retro);
+  font-size: 0.68rem;
+  color: #38bdf8;
+}
+
+.empty-list {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+/* Oyun Tahtası */
+.board-card {
+  padding: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 35px rgba(99, 102, 241, 0.2), inset 0 0 15px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.canvas-container {
+  position: relative;
+  width: 300px;
+  height: 600px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #060810;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+#tetris-canvas {
+  display: block;
+  width: 300px;
+  height: 600px;
+}
+
+/* Kayan Bildirim Mesajı */
+.float-message {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  font-family: var(--font-retro);
+  font-size: 1.3rem;
+  text-align: center;
+  color: #facc15;
+  text-shadow: 0 0 15px rgba(250, 204, 21, 0.8);
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.4s ease;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.float-message.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Overlay Ekranı */
+.overlay-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 13, 23, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+
+.overlay-screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 1.5rem;
+  max-width: 250px;
+}
+
+.glitch-title {
+  font-family: var(--font-retro);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+  background: linear-gradient(135deg, #f43f5e, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.overlay-content p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.4rem;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Kontroller Rehberi */
+.controls-guide .control-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.controls-guide li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+/* Modal Pencereleri */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 360px;
+  padding: 1.5rem;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(168, 85, 247, 0.2);
+}
+
+.modal-card.achievements-card {
+  max-width: 440px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modal-header h3 {
+  font-family: var(--font-retro);
+  font-size: 0.85rem;
+  color: #f8fafc;
+}
+
+.close-btn {
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.2rem 0.5rem;
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: rgba(99, 102, 241, 0.4);
+  color: #fff;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.form-group input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.form-group input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.auth-feedback {
+  font-size: 0.8rem;
+  min-height: 1.2rem;
+  color: #f87171;
+  text-align: center;
+}
+
+.auth-feedback.success {
+  color: #4ade80;
+}
+
+.auth-submit-btn {
+  width: 100%;
+}
+
+/* Başarımlar Listesi & Toast */
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.achievement-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem;
+  border-radius: 10px;
+  opacity: 0.45;
+  filter: grayscale(80%);
+  transition: all 0.25s ease;
+}
+
+.achievement-card.unlocked {
+  opacity: 1;
+  filter: grayscale(0%);
+  border-color: rgba(250, 204, 21, 0.4);
+  background: rgba(250, 204, 21, 0.06);
+}
+
+.ach-icon {
+  font-size: 1.8rem;
+}
+
+.ach-info h4 {
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 0.15rem;
+}
+
+.achievement-card.unlocked .ach-info h4 {
+  color: #facc15;
+}
+
+.ach-info p {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* Toast Bildirimi */
+.achievement-toast {
+  position: fixed;
+  top: 1.5rem;
+  right: -320px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(18, 22, 39, 0.95);
+  border: 1px solid #facc15;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.5);
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  z-index: 200;
+  transition: right 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.achievement-toast.show {
+  right: 1.5rem;
+}
+
+.toast-icon {
+  font-size: 1.6rem;
+}
+
+.toast-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.toast-label {
+  font-family: var(--font-retro);
+  font-size: 0.6rem;
+  color: #facc15;
+}
+
+.toast-text strong {
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+/* Dokunmatik / Mobil Kontroller */
+.touch-controls {
+  display: none;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 1.25rem;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.touch-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.touch-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: background 0.1s, transform 0.1s;
+}
+
+.touch-btn:active {
+  background: rgba(99, 102, 241, 0.5);
+  transform: scale(0.92);
+}
+
+.touch-btn.action-btn {
+  font-size: 1.1rem;
+}
+
+.touch-btn.hard-drop {
+  color: #facc15;
+}
+
+.touch-btn.rotate {
+  color: #38bdf8;
+}
+
+.touch-btn.hold {
+  color: #a855f7;
+}
+
+/* Mobil Uyumluluk */
+@media (max-width: 768px) {
+  .game-wrapper {
+    padding: 0.75rem;
+  }
+
+  .main-layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .side-panel {
+    width: calc(50% - 0.5rem);
+    order: 2;
+  }
+
+  .game-center {
+    order: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .board-card {
+    padding: 8px;
+  }
+
+  .canvas-container {
+    width: 250px;
+    height: 500px;
+  }
+
+  #tetris-canvas {
+    width: 250px;
+    height: 500px;
+  }
+
+  .controls-guide {
+    display: none;
+  }
+
+  .touch-controls {
+    display: flex;
+    order: 3;
+  }
+}

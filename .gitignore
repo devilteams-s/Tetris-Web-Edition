@@ -1,0 +1,25 @@
+# Database & Data files
+*.db
+*.sqlite
+*.sqlite3
+data/
+*.log
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+
+# Environments & configs
+.env
+.env.local
+.venv/
+env/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~

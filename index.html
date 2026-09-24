@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris Web Edition - Neon Arcade</title>
+  <meta name="description" content="Modern, neon temalı, çoklu modlu, hesap sistemli ve müzikli Tetris oyunu.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-grid"></div>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Başarım Bildirimi Popup (Toast) -->
+  <div id="achievement-toast" class="achievement-toast">
+    <div class="toast-icon" id="toast-icon">🏆</div>
+    <div class="toast-text">
+      <span class="toast-label" data-i18n="achievementUnlocked">BAŞARIM AÇILDI!</span>
+      <strong id="toast-title">İlk Zafer</strong>
+    </div>
+  </div>
+
+  <main class="game-wrapper" id="game-wrapper">
+    <!-- Header -->
+    <header class="game-header">
+      <h1 class="logo">TETRIS<span class="logo-sub">NEON</span></h1>
+      <div class="header-badges">
+        <!-- Kullanıcı Durum Rozeti -->
+        <div id="user-badge" class="user-badge">
+          <button id="btn-open-auth" class="btn-user-action">
+            <span class="user-icon">👤</span>
+            <span id="user-display-name" data-i18n="accountLoginBtn">Giriş Yap</span>
+          </button>
+          <button id="btn-logout" class="btn-icon btn-logout hidden" title="Çıkış Yap" aria-label="Çıkış Yap">🚪</button>
+        </div>
+
+        <button id="btn-open-achievements" class="btn-icon" title="Başarımlar" aria-label="Başarımlar">🏆</button>
+        <button id="btn-toggle-bgm" class="btn-icon" title="Arka Plan Müziği (Korobeiniki 8-Bit)" aria-label="Müzik Aç/Kapat">🎵</button>
+        <button id="btn-toggle-sound" class="btn-icon" aria-label="Ses Efektleri Aç/Kapat" title="Ses Aç/Kapat (M)">🔔</button>
+        <button id="btn-toggle-lang" class="btn-lang" aria-label="Dili Değiştir / Switch Language" title="Dil / Language">
+          <span class="lang-flag">🌐</span> <span id="lang-indicator">EN</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Oyun Modu Seçici Çubuğu (Game Modes) -->
+    <nav class="mode-bar">
+      <button class="mode-btn active" data-mode="marathon" data-i18n="modeMarathon">MARATON</button>
+      <button class="mode-btn" data-mode="sprint" data-i18n="modeSprint">40 SATIR SPRINT</button>
+      <button class="mode-btn" data-mode="ultra" data-i18n="modeUltra">2 DK ULTRA</button>
+      <button class="mode-btn" data-mode="survival" data-i18n="modeSurvival">HAYATTA KALMA</button>
+    </nav>
+
+    <div class="main-layout">
+      <!-- Sol Panel: Hold & Stats -->
+      <aside class="side-panel left-panel">
+        <section class="glass-card panel-section">
+          <h2 class="section-title" data-i18n="holdTitle">SAKLANAN</h2>
+          <div class="canvas-box mini-canvas-box">
+            <canvas id="hold-canvas" width="120" height="120"></canvas>
+          </div>
+          <p class="hint-text"><kbd>C</kbd> / <kbd>Shift</kbd></p>
+        </section>
+
+        <section class="glass-card panel-section stats-section">
+          <div class="stat-item" id="timer-box" style="display: none;">
+            <span class="stat-label" data-i18n="statTime">SÜRE</span>
+            <span class="stat-value highlight" id="time-val">00:00</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label" data-i18n="statScore">SKOR</span>
+            <span class="stat-value highlight" id="score-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label" data-i18n="statHighScore">EN YÜKSEK</span>
+            <span class="stat-value" id="highscore-val">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label" data-i18n="statLevel">SEVİYE</span>
+            <span class="stat-value" id="level-val">1</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label" data-i18n="statLines">SATIRLAR</span>
+            <span class="stat-value" id="lines-val">0</span>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Orta: Ana Oyun Alanı -->
+      <section class="game-center">
+        <div class="glass-card board-card" id="board-card">
+          <div class="canvas-container">
+            <canvas id="tetris-canvas" width="300" height="600"></canvas>
+            
+            <!-- Bildirim Efektleri (TETRIS!, COMBO vs) -->
+            <div id="float-message" class="float-message"></div>
+
+            <!-- Oyun Durum Katmanları (Başla / Duraklatıldı / Oyun Bitti) -->
+            <div id="overlay-screen" class="overlay-screen active">
+              <div class="overlay-content">
+                <h2 id="overlay-title" class="glitch-title" data-i18n="readyTitle">HAZIR MISIN?</h2>
+                <p id="overlay-desc" data-i18n="readyDesc">Klasik Tetris deneyimi, neon efektler ve seslerle!</p>
+                <button id="btn-main-action" class="btn-primary" data-i18n="btnStart">OYUNA BAŞLA</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sağ Panel: Next & Sıralama (Leaderboard) & Tuşlar -->
+      <aside class="side-panel right-panel">
+        <section class="glass-card panel-section">
+          <h2 class="section-title" data-i18n="nextTitle">SIRADAKİ</h2>
+          <div class="canvas-box mini-canvas-box">
+            <canvas id="next-canvas" width="120" height="120"></canvas>
+          </div>
+          <div class="canvas-box mini-canvas-box sub-next">
+            <canvas id="next2-canvas" width="80" height="80"></canvas>
+          </div>
+        </section>
+
+        <!-- Liderlik Tablosu -->
+        <section class="glass-card panel-section leaderboard-section">
+          <h3 class="section-title" data-i18n="leaderboardTitle">LİDERLER</h3>
+          <ul class="leaderboard-list" id="leaderboard-list">
+            <li class="empty-list" data-i18n="noPlayersYet">Henüz kayıtlı skor yok</li>
+          </ul>
+        </section>
+
+        <section class="glass-card panel-section controls-guide">
+          <h3 class="section-title" data-i18n="controlsTitle">KONTROLLER</h3>
+          <ul class="control-list">
+            <li><span data-i18n="ctrlRotate">Döndür:</span> <span><kbd>↑</kbd> <kbd>X</kbd></span></li>
+            <li><span data-i18n="ctrlMove">Sol / Sağ:</span> <span><kbd>←</kbd> <kbd>→</kbd></span></li>
+            <li><span data-i18n="ctrlSoftDrop">Hızlı Düşüş:</span> <span><kbd>↓</kbd></span></li>
+            <li><span data-i18n="ctrlHardDrop">Anında Düşür:</span> <span><kbd>Space</kbd></span></li>
+            <li><span data-i18n="ctrlHold">Taşı Sakla:</span> <span><kbd>C</kbd> / <kbd>Shift</kbd></span></li>
+            <li><span data-i18n="ctrlPause">Duraklat:</span> <span><kbd>P</kbd> / <kbd>Esc</kbd></span></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <!-- Mobil / Dokunmatik Kontroller -->
+    <div class="touch-controls" id="touch-controls">
+      <div class="touch-group d-pad">
+        <button class="touch-btn" id="touch-left" aria-label="Sol">◀</button>
+        <button class="touch-btn" id="touch-down" aria-label="Aşağı">▼</button>
+        <button class="touch-btn" id="touch-right" aria-label="Sağ">▶</button>
+      </div>
+      <div class="touch-group actions">
+        <button class="touch-btn action-btn rotate" id="touch-rotate" aria-label="Döndür">↻</button>
+        <button class="touch-btn action-btn hard-drop" id="touch-hard-drop" aria-label="Düşür">⚡</button>
+        <button class="touch-btn action-btn hold" id="touch-hold" aria-label="Sakla">📦</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Hesap Giriş / Kayıt Modal Penceresi -->
+  <div id="auth-modal" class="modal-backdrop">
+    <div class="glass-card modal-card">
+      <div class="modal-header">
+        <h3 id="auth-modal-title" data-i18n="authModalTitleLogin">Hesaba Giriş Yap</h3>
+        <button id="btn-close-modal" class="btn-icon close-btn">&times;</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button id="tab-login" class="tab-btn active" data-i18n="tabLogin">Giriş Yap</button>
+        <button id="tab-register" class="tab-btn" data-i18n="tabRegister">Kayıt Ol</button>
+      </div>
+
+      <form id="auth-form" class="auth-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="auth-username" data-i18n="authLabelUser">Kullanıcı Adı</label>
+          <input type="text" id="auth-username" required autocomplete="username" placeholder="Örn: TetrisMaster" minlength="3">
+        </div>
+        <div class="form-group">
+          <label for="auth-password" data-i18n="authLabelPass">Şifre</label>
+          <input type="password" id="auth-password" required autocomplete="current-password" placeholder="En az 4 karakter" minlength="4">
+        </div>
+
+        <div id="auth-feedback" class="auth-feedback"></div>
+
+        <button type="submit" id="btn-submit-auth" class="btn-primary auth-submit-btn" data-i18n="authSubmitLogin">Giriş Yap</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Başarımlar Modal Penceresi -->
+  <div id="achievements-modal" class="modal-backdrop">
+    <div class="glass-card modal-card achievements-card">
+      <div class="modal-header">
+        <h3 data-i18n="achievementsTitle">🏆 BAŞARIMLAR</h3>
+        <button id="btn-close-achievements" class="btn-icon close-btn">&times;</button>
+      </div>
+      <div class="achievements-list" id="achievements-list">
+        <!-- JS ile dolacak -->
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="auth.js"></script>
+  <script src="achievements.js"></script>
+  <script src="tetris.js"></script>
+</body>
+</html>
