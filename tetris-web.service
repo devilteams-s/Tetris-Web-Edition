@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=mehmet
 WorkingDirectory=/home/mehmet/Tetris-Web-Edition
-ExecStart=/usr/bin/python3 /home/mehmet/Tetris-Web-Edition/server.py 3000
+ExecStart=/usr/bin/python3 /home/mehmet/Tetris-Web-Edition/server.py 3030
 Restart=always
 RestartSec=3
 Environment=PYTHONUNBUFFERED=1

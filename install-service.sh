@@ -9,7 +9,7 @@ SERVICE_NAME="tetris-web"
 SERVICE_FILE="tetris-web.service"
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CURRENT_USER="$(logname 2>/dev/null || echo "$USER")"
-PORT="${1:-3000}"
+PORT="${1:-3030}"
 
 echo "======================================================"
 echo "🕹️  Tetris Web Edition - Servis Kurulumu"

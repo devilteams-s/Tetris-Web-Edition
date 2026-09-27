@@ -14,7 +14,7 @@ import os
 import hashlib
 import sys
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 3000
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 3030
 DB_FILE = os.path.join(os.path.dirname(__file__), "tetris.db")
 
 def init_db():

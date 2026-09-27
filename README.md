@@ -113,7 +113,7 @@ sudo journalctl -u tetris-web -f    # Canlı logları görüntüle
 ### 4. Oyuna Giriş
 Tarayıcınızı açın ve adrese gidin:
 ```
-http://localhost:3000
+http://localhost:3030
 ```
 
 ---
